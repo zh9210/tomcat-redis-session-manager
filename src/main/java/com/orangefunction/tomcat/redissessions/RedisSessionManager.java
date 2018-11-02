@@ -58,6 +58,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
   protected int port = 6379;
   protected int database = 0;
   protected String password = null;
+  protected boolean ssl;
   protected int timeout = Protocol.DEFAULT_TIMEOUT;
   protected String sentinelMaster = null;
   Set<String> sentinelSet = null;
@@ -123,6 +124,19 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
     this.password = password;
   }
 
+  public boolean isSsl() {
+    return this.ssl;
+  }
+
+  public void setSsl(boolean ssl) {
+    this.ssl = ssl;
+  }
+
+  public void setSsl(String ssl) {
+    if (ssl != null) {
+      this.setSsl(Arrays.asList("1", "on", "true", "yes").contains(ssl.toLowerCase()));
+    }
+  }
   public void setSerializationStrategyClass(String strategy) {
     this.serializationStrategyClass = strategy;
   }
@@ -691,22 +705,23 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
   }
 
   private void initializeDatabaseConnection() throws LifecycleException {
-    try {
-      if (getSentinelMaster() != null) {
-        Set<String> sentinelSet = getSentinelSet();
-        if (sentinelSet != null && sentinelSet.size() > 0) {
-          connectionPool = new JedisSentinelPool(getSentinelMaster(), sentinelSet, this.connectionPoolConfig, getTimeout(), getPassword());
+      try {
+        if (this.getSentinelMaster() != null) {
+          Set<String> sentinelSet = this.getSentinelSet();
+          if (sentinelSet == null || sentinelSet.size() <= 0) {
+            throw new LifecycleException("Error configuring Redis Sentinel connection pool: expected both `sentinelMaster` and `sentiels` to be configured");
+          }
+
+          this.connectionPool = new JedisSentinelPool(this.getSentinelMaster(), sentinelSet, this.connectionPoolConfig, this.getTimeout(), this.getPassword());
         } else {
-          throw new LifecycleException("Error configuring Redis Sentinel connection pool: expected both `sentinelMaster` and `sentiels` to be configured");
+          this.connectionPool = new JedisPool(this.connectionPoolConfig, this.getHost(), this.getPort(), this.getTimeout(), this.getPassword(), this.isSsl());
         }
-      } else {
-        connectionPool = new JedisPool(this.connectionPoolConfig, getHost(), getPort(), getTimeout(), getPassword());
+
+      } catch (Exception var2) {
+        var2.printStackTrace();
+        throw new LifecycleException("Error connecting to Redis", var2);
       }
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new LifecycleException("Error connecting to Redis", e);
     }
-  }
 
   private void initializeSerializer() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
     log.info("Attempting to use serializer :" + serializationStrategyClass);
