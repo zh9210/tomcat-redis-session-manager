@@ -1,4 +1,4 @@
-Redis Session Manager for Apache Tomcat
+Redis Session Manager for Apache Tomcat (Support SSL)
 =======================================
 
 Overview
