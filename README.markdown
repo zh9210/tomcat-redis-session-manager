@@ -45,7 +45,7 @@ Tomcat 8
 
 Tomcat 8 is not currently supported and has not been tested or developed for at all In fact, as noted in various bug reports, the project currently fails to compile when linked with Tomcat 8.
 
-I currently don't have the time to add Tomcat 8 support in my spare time. However if you're interested in Tomcat 8 support for your particular use case and/or business, as the README notes, I'm available as a consultancy on a contractual basis. If you'd like to pursue getting this feature added at a contract rate (and gain some commercial support as well), feel free to contact me at james@orangefunction.com.
+I currently don't have the time to add Tomcat 8 support in my spare time. However if you're interested in Tomcat 8 support for your particular use case and/or business, as the README notes, I'm available as a consultancy on a contractual basis.
 
 Architecture
 ------------
